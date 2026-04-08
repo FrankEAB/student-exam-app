@@ -1,22 +1,26 @@
+import os
 from pathlib import Path
 import environ
 
-
+# 1. Setup Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# 2. Initialize Environ
 env = environ.Env(
-    DEBUG=(bool, True)
+    DEBUG=(bool, False) # Default to False for safety
 )
 
+# 3. Read .env file
 environ.Env.read_env(BASE_DIR / ".env")
 
+# 4. Core Security Settings
 SECRET_KEY = env("SECRET_KEY")
-
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+# This pulls from your .env list or defaults to your PythonAnywhere URL
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["FrankEAB.pythonanywhere.com", "localhost", "127.0.0.1"])
 
+# 5. Application Definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -26,16 +30,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-
     'users',
     'applications',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    'whitenoise.middleware.WhiteNoiseMiddleware', # For static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -45,13 +46,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'student_exam_application_system.urls'
-
 WSGI_APPLICATION = 'student_exam_application_system.wsgi.application'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"], 
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,7 +63,7 @@ TEMPLATES = [
     },
 ]
 
-
+# 6. Database Configuration (MySQL for PythonAnywhere)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -72,7 +72,7 @@ DATABASES = {
         "PASSWORD": env("DB_PASSWORD"),
         "HOST": env("DB_HOSTNAME", default="localhost"),
         "PORT": env("DB_PORT", default="3306"),
-        "CONN_MAX_AGE": 60,  
+        "CONN_MAX_AGE": 60,
         "OPTIONS": {
             "charset": "utf8mb4",
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -80,9 +80,11 @@ DATABASES = {
     }
 }
 
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# 7. Authentication & Login Logic
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.StudentBackend', # Your custom Universal Login
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -91,36 +93,28 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# 8. Internationalization
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'Africa/Lagos' 
-
+TIME_ZONE = 'Africa/Lagos'
 USE_I18N = True
 USE_TZ = True
 
-
+# 9. Static Files & WhiteNoise
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
+# 10. Security Settings for Production
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-SECURE_BROWSER_XSS_FILTER = TrueAUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'users.backends.StudentIDBackend',
-]
+SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-
+# 11. REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'users.backends.StudentBackend',
-]
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
