@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 import environ
 
+import dj_database_url
+
+
 # 1. Setup Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -68,19 +71,11 @@ TEMPLATES = [
 
 # 6. Database Configuration (MySQL for PythonAnywhere)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USERNAME"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOSTNAME", default="localhost"),
-        "PORT": env("DB_PORT", default="3306"),
-        "CONN_MAX_AGE": 60,
-        "OPTIONS": {
-            "charset": "utf8mb4",
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
+    "default": dj_database_url.config(
+        default="sqlite:///db.sqlite3",
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
 }
 
 # 7. Authentication & Login Logic
