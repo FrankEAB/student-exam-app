@@ -18,7 +18,10 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
 # This pulls from your .env list or defaults to your PythonAnywhere URL
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["FrankEAB.pythonanywhere.com", "localhost", "127.0.0.1"])
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["localhost", "127.0.0.1", ".onrender.com"]
+)
 
 # 5. Application Definition
 INSTALLED_APPS = [
